@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="script/vue.min.js"></script>
+<script type="text/javascript" src="script/vue-resource.min.js"></script>
+<script type="text/javascript" src="script/json2.js"></script>
+<script type="text/javascript" src="script/jquery-1.8.1.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title></title>
+	<link rel="stylesheet" href="css/reset.css">
+	<link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+<div class="public-header-warrp" id="head">
+	<div class="public-header">
+		<div class="content">
+			<div class="public-header-logo"><a href=""><i>LOGO</i>
+			<h3>aowin</h3></a></div>
+			<span style="display: none" id="quanerror">${quanerror}</span>
+			<span style="display: none" id="userid">${user.userid}</span>
+			<span style="display: none" id="username">${user.username}</span>
+			<span style="display: none" id="password">${user.password}</span>
+			<div class="public-header-admin fr">
+				<span v-if="username==''">您还未登录</span>
+				<span v-else>{{username}} 你好!</span>
+				<div class="public-header-fun fr">
+					<a href="temp.htm" class="public-header-man">管理</a>
+					<a class="public-header-loginout" @click="tuichu()">安全退出</a>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="clearfix"></div>
+<!-- 内容展示 -->
+<div class="public-ifame mt20">
+	<div class="content">
+	<!-- 内容模块头 -->
+		
+		<div class="clearfix"></div>
+		<!-- 左侧导航栏 -->
+		<div class="public-ifame-leftnav">
+			<div class="public-title-warrp">
+				<div class="public-ifame-title ">
+					<a href="">首页</a>
+				</div>
+			</div>
+			<ul class="left-nav-list">
+				<li class="public-ifame-item">
+					<a href="javascript:;">用户操作</a>
+					<div class="ifame-item-sub">
+						<ul>
+							<li class="active"><a href="ShowBook.do" target="content">借书</a></li>
+							<li><a href="ShowBorrow.do?userid=${user.userid}" target="content"">还书</a></li>
+							<li><a href="ShowOwing.do?userid=${user.userid}" target="content">逾期缴费</a></li>
+						</ul>
+					</div>
+				</li>	
+			</ul>
+		</div>
+		<!-- 右侧内容展示部分 -->
+		<div class="public-ifame-content">
+		<iframe name="content" src="main.jsp" frameborder="0" id="mainframe" scrolling="yes" marginheight="0" marginwidth="0" width="100%" style="height: 700px;"></iframe>
+		</div>
+	</div>
+</div>
+</body>
+<script type="text/javascript">
+var vue=new Vue({
+	el:"#head",
+	data:{
+		username:''
+	},
+	methods:{
+		init:function(){
+		var userstr = sessionStorage.getItem("user");
+		if(userstr==''||userstr==null){
+			this.username='';	
+			}else{
+			var user = JSON.parse(userstr);
+			this.username = user.username;
+			} 
+		},
+		tuichu:function(){
+			sessionStorage.setItem("user",'');
+			this.$http.get('Tuichu.do').then(
+				function() {
+					location.href="http://localhost:8088/SpringBoot/temp.htm";
+				}
+				);
+		}
+	}
+});
+vue.init();
+</script>
+<script src="script/jquery.min.js"></script>
+<script>
+$().ready(function(){
+	var item = $(".public-ifame-item");
+
+	for(var i=0; i < item.length; i++){
+		$(item[i]).on('click',function(){
+			$(".ifame-item-sub").hide();
+			if($(this.lastElementChild).css('display') == 'block'){
+				$(this.lastElementChild).hide()
+				$(".ifame-item-sub li").removeClass("active");
+			}else{
+				$(this.lastElementChild).show();
+				$(".ifame-item-sub li").on('click',function(){
+					$(".ifame-item-sub li").removeClass("active");
+					$(this).addClass("active");
+				});
+			}
+		});
+	}
+});
+</script>
+</html>

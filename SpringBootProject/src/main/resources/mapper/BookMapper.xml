@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aowin.dao.BookMapper">
+<select id="ShowBook" resultType="com.aowin.model.Book" parameterType="java.util.Map">
+select
+   bookid,bookname,author,price,publisher,status,bookcode
+from
+	book where status=1 limit #{begin},#{pagesize};
+</select>
+
+<select id="SelectAll" resultType="com.aowin.model.Book">
+select
+   bookid,bookname,author,price,publisher,status,bookcode
+from
+	book where status=1;
+</select>
+
+<select id="Login" resultType="com.aowin.model.User">
+select 
+	userid,username, password,idcard,phone,createtime,status,owing_money
+from 
+	user
+where
+	username = #{account}
+and
+	password = #{password}
+</select>
+
+<insert id="addbookrecord" parameterType="com.aowin.model.Bookrecord">
+insert into book_record (userid,bookid,lendtime,expiretime) values
+	(#{userid},#{bookid},#{lendtime},#{expiretime})
+</insert>
+
+<update id="UpdateBook" parameterType="int">
+	update book 
+	<set>
+	status=-1
+	</set>
+	where bookid=#{bookid}
+</update>
+
+<select id="Showlend" resultType="com.aowin.model.LendBook" parameterType="java.util.Map">
+select
+   b.bookid bookid,b.bookname bookname,b.author author,b.price price,b.publisher publisher,b.bookcode bookcode,
+   ((unix_timestamp(br.expiretime)-unix_timestamp(CURRENT_DATE))/60/60/24) freeday
+from
+	book b,book_record br where br.userid=#{userid} and br.bookid=b.bookid and br.returntime is null limit #{begin},#{pagesize};
+</select>
+
+<select id="Alllend" resultType="com.aowin.model.LendBook" parameterType="String">
+select
+   b.bookid bookid,b.bookname bookname,b.author author,b.price price,b.publisher publisher,b.bookcode bookcode,
+   ((unix_timestamp(br.expiretime)-unix_timestamp(CURRENT_DATE))/60/60/24) freeday
+from
+	book b,book_record br where br.userid=#{userid} and br.bookid=b.bookid and br.returntime is null;
+</select>
+<update id="returnrecord">
+	update  book_record
+	<set>
+	returntime=#{returntime}
+	</set>
+	where bookid=#{bookid}
+	and userid=#{userid}
+</update>
+
+<update id="returnbook" parameterType="int">
+	update  book
+	<set>
+	status=1
+	</set>
+	where bookid=#{bookid}
+</update>
+
+<update id="returnuser" parameterType="java.util.Map">
+	update  user
+	<set>
+	owing_money=#{owing}
+	</set>
+	where userid=#{userid};
+</update>
+
+<select id="Showowing" resultType="double" parameterType="String">
+select
+   owing_money
+from
+	user where userid=#{userid};
+</select>
+
+<update id="pay" parameterType="String">
+	update  user
+	<set>
+	owing_money=0
+	</set>
+	where userid=#{userid};
+</update>
+
+<insert id="payinsert" parameterType="com.aowin.model.Moneyrecord">
+insert into account_record (userid,money,changetime,type) values
+	(#{userid},#{money},#{changetime},#{type})
+</insert>
+</mapper>

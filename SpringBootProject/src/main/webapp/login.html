@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="script/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="script/vue.min.js"></script>
+<script type="text/javascript" src="script/vue-resource.min.js"></script>
+<script type="text/javascript" src="script/json2.js"></script>
+<link rel="stylesheet" href="css/reset.css" />
+<link rel="stylesheet" href="css/content.css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script type="text/javascript" src="script/jquery-1.8.1.min.js"></script>
+<title></title>
+	<link rel="stylesheet" href="css/reset.css" />
+	<link rel="stylesheet" href="css/login.css" />
+</head>
+<body>
+<div id="app">
+	<div class="loginwarrp">
+		<div class="logo">图书管理系统</div>
+        <div class="login_form">
+				<li class="login-item">
+					<span>用户名：</span>
+					<input type="text" name="account" v-model="login_name">
+				</li>
+				<li class="login-item">
+					<span>密　码：</span>
+					<input type="password" name="password" v-model="password">
+				</li>
+				<li class="login-item">
+					<span>验证码：</span>
+					<input type="text" name="code" v-model="codemsg"><span>{{code}}</span>
+					<input type="button" value="刷新验证码" @click="init()">
+				</li>
+				<div class="clearfix"></div>
+				<li class="login-sub">
+					<input type="button" name="Submit" value="登录" @click="login()"/>
+				</li> 
+           <span style="color: red">{{msg}}</span>
+		</div>
+	</div>
+</div>
+</body>
+<script type="text/javascript">
+var vm=new Vue({
+	el:"#app",
+	data:{
+		login_name:'',
+		password:'',
+		msg:'',
+		codemsg:'',
+		code:''
+	},
+	methods:{
+		login:function(){
+			this.$http.post("login",{account:this.login_name,password:this.password,msg:this.codemsg},{emulateJSON:true}).then(
+				function(resp){
+					var map = resp.body;
+					var user=map.user;
+					if(map!=''){
+					if(user){
+						sessionStorage.setItem("user",JSON.stringify(user));
+						location.href="http://localhost:8088/SpringBoot/index.html";
+					}else{
+						sessionStorage.setItem("user",'');
+						this.msg = "账号密码错误";
+					}}else{
+						this.msg = "验证码输入错误!";
+					}
+				}		
+			);
+		},
+		init:function(){
+			this.$http.get("send").then(
+				function(resp){
+					this.code = resp.body;
+				}		
+			);
+		}
+	}
+});
+vm.init();
+</script>
+</html>
